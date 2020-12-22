@@ -6,7 +6,7 @@ outpath = inpath + '.best_mir_only.tsv'
 with open(inpath) as infile:
     d = {}
     for line in infile:
-        if 'miR' not in line:
+        if 'miR' not in line and 'let' not in line:
             continue
         spl = line.split('\t')
         line_id = spl[0]
@@ -35,8 +35,6 @@ with open(inpath) as infile:
         elif float(d[line_id].split('\t')[2]) == score and int(d[line_id].split('\t')[3]) == length:
             if int(d[line_id].split('\t')[8]) > read_start:
                 d[line_id] = line
-            # else:
-            #     print(d[line_id], line)
 
         elif float(d[line_id].split('\t')[2]) <= score and int(d[line_id].split('\t')[3]) <= length:          
             d[line_id] = line

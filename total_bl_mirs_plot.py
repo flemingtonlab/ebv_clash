@@ -2,13 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-# BL microRNA barplot, percent EBV (Fig 1a?)
-s = pd.read_csv('/Volumes/Flemington_Lab_Documents/20_lab_member_directories/3_Nate/\
-    Papers/The_EBV_microRNA_targetome/data_for_figures/figure1/A/blood871418-suppl2.csv', index_col=0)  # metadata from original BL paper (blood 2019)
+hsa_color = '0.5'
+ebv_color = '#149911'
 
-m = pd.read_table('/Volumes/Flemington_Lab_Documents/20_lab_member_directories/3_Nate/\
-    Papers/The_EBV_microRNA_targetome/data_for_figures/figure1/A/bl_mir_cpm_primary_tumors_only.tsv', index_col=0)  # BL c.p.m. microRNA
-
+s = pd.read_csv('/Users/nate/Projects/EBV_interactome/bl/blood871418-suppl2.csv', index_col=0)
+m = pd.read_table('/Users/nate/Projects/EBV_interactome/bl/bl_mir_cpm_primary_tumors_only.tsv', index_col=0)
 d = {'pos':[],'neg':[]}
 
 for i,j in zip(s['Patient barcode'], s['EBV status']):
@@ -17,20 +15,36 @@ for i,j in zip(s['Patient barcode'], s['EBV status']):
     else:
         d['neg'].append(i)
 
-m2 = m[list(set(d['pos']) & set(m.columns))]
+m1 = m[set(d['neg']) & set(m.columns)]
+m2 = m[set(d['pos']) & set(m.columns)]
+m3 = pd.DataFrame(index=m.index)
 
 m2 = m2[np.sum(m2.loc[[i for i in m2.index if 'ebv' in i]]).sort_values().index]
 
-sums = np.sum(m2.loc[[i for i in m2.index if 'ebv' in i]]) / 10000  # convert c.p.m. to c.p.hundred for percentage plotting
+m3[m1.columns] = m1
+m3[m2.columns] = m2
 
-fig = plt.figure(figsize=(24,5), dpi=300)
+fig = plt.figure(figsize=(24,6), dpi=300)
 ax = plt.subplot()
+patients = len(m3.columns)
+
+
+for x,patient in enumerate(m3.columns):
+    hsa = m3.loc[[i for i in m3.index if 'hsa' in i]]
+    ebv = m3.loc[[i for i in m3.index if 'ebv' in i]]
+    plt.scatter([x-.2]*len(hsa), hsa[patient], c=hsa_color, s=4, alpha=.8, linewidth=0)
+    plt.scatter([x-.2]*len(ebv), ebv[patient], c=ebv_color, s=4, alpha=.8,linewidth=0)
+
+means = np.sum(m3.loc[[i for i in m3.index if 'ebv' in i]])/10000
+
 ax2 = ax.twinx()
-ax2.bar([i-.2 for i in range(len(m2.columns))], sums, facecolor='#88D498', ec='k', linewidth=.5)
-ax2.set_yticks(range(0, 101, 25))
-ax.set_xlim([-1, 68.5])
-ax.set_yticks([])
+plt.fill_between(range(patients), means, alpha=.1, color=ebv_color, linewidth=0)
+ax2.plot(range(patients), means, c=ebv_color, linewidth=.3, ls='-', alpha=.3)
+
+ax2.set_yticks(range(0, 101, 10))
+ax2.set_ylim([0, 100])
+ax.set_ylim([0, 500000])
+
+ax2.grid(alpha=.7 , ls='--',lw=.2)
 ax.set_xticks([])
-ax2.grid(ls='--',alpha=.5)
-ax2.set_axisbelow(True)
-plt.savefig('bl_sum_ebv_mirs.svg',dpi=300)
+ax.set_xlim([-1, 84])

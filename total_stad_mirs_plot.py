@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # STAD microRNA barplot, percent EBV (Fig 1b?)
-m = pd.read_table('/Volumes/Flemington_Lab_Documents/20_lab_member_directories/3_Nate/'
-    'Papers/The_EBV_microRNA_targetome/data_for_figures/figure1/B/stad_mir_cpm.tsv', index_col=0)  # STAD c.p.m. microRNA
+m = pd.read_table('/Users/nate/Projects/EBV_interactome/stad/stad_mir_cpm.tsv', index_col=0)  # STAD c.p.m. microRNA
 
 m2 = m[np.sum(m.loc[[i for i in m.index if 'ebv' in i]]).sort_values().index]
 m2 = m2[m2.columns[-38:]]
